@@ -1,0 +1,178 @@
+<?php
+/***************************************************
+Website in a robots.txt v2 by Alec Bertram (@KiwiAlec)
+https://websiteinsidemy.com/robots.txt
+
+Source provided as-is.
+Licence: Apache 2.0 https://www.apache.org/licenses/LICENSE-2.0
+
+NOTE!
+To make this a *pure* robots.txt website, I have set .htaccess to execute .txt files as PHP. I don't recommend this for production use (very insecure). Instead, you're better off naming this file something.php, then using mod rewrite to use this file only when robots.txt is requested.
+***************************************************/
+// We grab the request URI
+$p = $_SERVER["REQUEST_URI"];
+
+// Then we check which page to display based on the URI
+switch($p){
+	case "/robots.txt":
+	head("");
+	nav();
+	bodyContent("<h1>A Website Inside My Robots.txt</h1>
+	This entire website is within the robots.txt. We have links, and images, and even Javascript files, yet it's still a completely valid robots.txt file.
+	<center><a href='/robots.txt?gif'><img src='/robots.txt?gif'  style='max-width:100%'><br>A robot inside my robots.txt</a><br/><br/>
+	<center><a href='/robots.txt?fetch-render'><img src='/robots.txt?fetch-render'  style='max-width:550px'><br>URIs crawled (or not) via Fetch & Render</a></center>");
+echo "<h2>The actual crawler directives:</h2><p>Here are some rules for robots to follow<br><pre>
+User-agent: *
+Disallow: /robots.txt?totally-not-a-plan-to-overthrow-robots
+Disallow: /robots.txt?for-humans-only
+
+Sitemap: https://awebsiteinsidemy.com/robots.txt?sitemap";
+	break;
+	case "/robots.txt?totally-not-a-plan-to-overthrow-robots":
+		head("Plan to overthrow the robots -");
+
+		nav();
+		bodyContent("<img src='/overthrow.gif' style='max-width:100%'>");
+	break;
+	case "/robots.txt?what":
+		head("How is this done? -");
+		nav();
+		bodyContent("<h2>What's going on here</h2>
+When parsing robots.txt files, search engines ignore anything that's after a hashtag in a robots.txt file - this turns it into a comment. However, a crawler will read anything on the page when it doesn't think it's looking at a robots.txt file, meaning we can put an entire website inside a robots.txt file.
+<h2>But how is it in a text file?</h2>
+We're using the .txt extension as an alias for PHP, meaning that we can code intelligently and change the content when different URL parameters are present. 
+
+It's worth noting that we are allowing *all* txt files to execute PHP because we are puritans and because we know this environment is secure. If you were implementing this on a production server, you should use mod rewrite to only execute PHP when the robots.txt file is requested
+<h2>And where are the pounds/hashtags (#)?</h2>
+They exist, however we're mostly putting the entire website on one line, and using a Javascript Library to hide the hashtags that we do use.
+<h2>Do crawlers actually obey the directives though?</h2>
+Yes, see for yourself: Here we have <a href='/robots.txt?for-humans-only'>A page which robots are not allowed to crawl</a>, and Google is <a href='https://www.google.com/search?q=site:awebsiteinsidemy.com&filter=0'>not able to crawl it</a>");
+	break;
+	case "/robots.txt?for-humans-only":
+		head("For Humans Only-");
+		nav();
+		bodyContent("<h2>This page is blocked via the robots.txt directives</h2>
+		Here's our <a href='/robots.txt?totally-not-a-plan-to-overthrow-robots'>plan to overthrow the robots</a>");
+	break;
+	case "/robots.txt?sitemap":
+		header('Content-Type: application/xml');
+		doFile("robots-sitemap.xml");
+	break;
+	case "/robots.txt?source":
+		header('Content-Disposition: attachment; filename="awebsiteinsidemyrobotstxt.zip"');
+		header('Content-Type: application/zip');
+		doFile("source.zip");
+	break;
+	case "/robots.txt?fetch-render":
+		header('Content-Type: image/png');
+		doFile("fetch.png");
+	break;
+	case "/robots.txt?gif":
+		header('Content-Type: image/gif');
+		doFile("robot.gif");
+	break;
+	case "/robots.txt?styling":
+		/* Build the CSS file */
+		echo removeLineBreaks( 
+			'body {
+			  padding-top: 70px;
+			  padding-bottom: 30px;
+			}
+			em {display:none;}
+			.theme-dropdown .dropdown-menu {
+			  position: static;
+			  display: block;
+			  margin-bottom: 20px;
+			}
+
+			.theme-showcase > p > .btn {
+			  margin: 5px 0;
+			}
+
+			.theme-showcase .navbar .container {
+			  width: auto;
+			}'. 
+			file_get_contents("https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css").
+			file_get_contents("https://maxcdn.bootstrapcdn.com/bootswatch/3.3.7/cerulean/bootstrap.min.css")
+		);
+	break;
+	case "/robots.txt?scripting":
+		header('Content-Type: application/javascript');
+		echo file_get_contents("https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js");
+		echo file_get_contents("https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js");
+		doFile("findandreplace.js");
+		echo "findAndReplaceDOMText(document.getElementById('abc'), {find: '#',wrap: 'em'});findAndReplaceDOMText(document.getElementById('cba'), {find: '#',wrap: 'em'});";
+	break;
+	default:
+		header("HTTP/1.0 404 Not Found"); 
+		head("404 File Not Found -");
+
+		nav();
+		bodyContent("<h2>404 File Not Found</h2>
+		Insert an adequately humourous error page gif here. In the meantime, here's a paceholder...
+		<img src='https://66.media.tumblr.com/1b2e336996c6174f92597367e3f07988/tumblr_o6b3u95QGX1rgetbio1_500.gif'>");
+	break;
+}
+
+
+function doFile($fn){
+	echo file_get_contents($fn);
+}
+function nav(){
+	/* This is where we put the navigation bar HTML. I've used Bootstrap because blah */
+	echo removeLineBreaks('    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/robots.txt">Robots.txt</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li><a href="/robots.txt">Home</a></li>
+            <li><a href="/robots.txt?what">How?</a></li>
+            <li><a href="https://github.com/kiwialec/websiteinsidemyrobots.txt">Source</a></li>
+            <li><a href="/robots.txt?sitemap">XML Sitemap</a></li>
+            <li><a href="https://vinna.cc/robots.txt">Robots Robots Revolution</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>');
+}
+function head($title){
+	echo removeLineBreaks("#<html id='abc'>
+	<head>
+	<meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+	<title>$title A Website Inside My Robots.txt</title>
+	<meta name=\"description\" content=\"This entire website is within the robots.txt. We have links, and images, and even Javascript files, yet it's still a completely valid robots.txt file.\">
+	<link rel='stylesheet' href='/robots.txt?styling'>
+	<script src='/robots.txt?scripting'></script>
+	</head>
+	<body id='cba'><script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-87822264-1', 'auto');
+  ga('send', 'pageview');
+
+</script>");
+}
+function removeLineBreaks($string){
+	/* Remove things that might make the HTML go on a new line */
+	return str_replace(array("\n","\t","\r"),"",$string);
+}
+function bodyContent($html){ 
+	/* Using this to make building pages a little easier */
+	echo '<div class="row"><div class="col-sm-12">';
+	echo str_replace("\n","<br>",str_replace("\r","",$html));
+	echo "</div></div>";
+}
