@@ -59,9 +59,7 @@ Yes, see for yourself: Here we have <a href='/robots.txt?for-humans-only'>A page
 		doFile("robots-sitemap.xml");
 	break;
 	case "/robots.txt?source":
-		header('Content-Disposition: attachment; filename="awebsiteinsidemyrobotstxt.zip"');
-		header('Content-Type: application/zip');
-		doFile("source.zip");
+		header('Location: https://github.com/kiwialec/websiteinsidemyrobots.txt');
 	break;
 	case "/robots.txt?fetch-render":
 		header('Content-Type: image/png');
